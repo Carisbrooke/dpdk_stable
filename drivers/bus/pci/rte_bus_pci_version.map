@@ -5,6 +5,8 @@ DPDK_17.11 {
 	rte_pci_get_sysfs_path;
 	rte_pci_ioport_map;
 	rte_pci_ioport_read;
+	rte_pci_bus;
+	pci_vfio_is_enabled;
 	rte_pci_ioport_unmap;
 	rte_pci_ioport_write;
 	rte_pci_map_device;

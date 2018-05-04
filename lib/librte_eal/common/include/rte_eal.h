@@ -171,6 +171,8 @@ int rte_eal_iopl_init(void);
  */
 int rte_eal_init(int argc, char **argv);
 
+int pci_vfio_is_enabled(void);
+
 /**
  * @warning
  * @b EXPERIMENTAL: this API may change without prior notice

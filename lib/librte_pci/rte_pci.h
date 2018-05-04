@@ -86,6 +86,8 @@ struct pci_msix_table {
 	uint32_t size;
 };
 
+extern struct rte_pci_bus rte_pci_bus;
+
 /**
  * A structure describing a mapped PCI resource.
  * For multi-process we need to reproduce all PCI mappings in secondary
