@@ -1846,8 +1846,11 @@ mlx5_rx_burst(void *dpdk_rxq, struct rte_mbuf **pkts, uint16_t pkts_n)
 				uint64_t ts = rte_be_to_cpu_64(cqe->timestamp);
 				struct mlx5dv_clock_info mlx_clock_info;
 				rv = mlx5dv_get_clock_info(master_ctx, &mlx_clock_info);
-				pkt->timestamp = mlx5dv_ts_to_ns(mlx_clock_info, ts);
-				pkt->ol_flags |= PKT_RX_TIMESTAMP;
+				if (!rv)
+				{
+					pkt->timestamp = mlx5dv_ts_to_ns(&mlx_clock_info, ts);
+					pkt->ol_flags |= PKT_RX_TIMESTAMP;
+				}
 			}
 
 			if (rxq->crc_present)
