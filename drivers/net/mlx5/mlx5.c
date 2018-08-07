@@ -77,6 +77,11 @@
 #define MLX5DV_CONTEXT_FLAGS_CQE_128B_COMP (1 << 4)
 #endif
 
+
+//repu1sion hack
+struct ibv_context *master_ctx = NULL;
+
+
 /**
  * Retrieve integer value from environment variable.
  *
@@ -774,6 +779,11 @@ mlx5_pci_probe(struct rte_pci_driver *pci_drv, struct rte_pci_device *pci_dev)
 		if (ctx == NULL) {
 			err = ENODEV;
 			goto port_error;
+		}
+		else
+		{
+			master_ctx = ctx;
+			printf("master ctx assigned!\n");
 		}
 
 		mlx5_glue->query_device_ex(ctx, NULL, &device_attr);

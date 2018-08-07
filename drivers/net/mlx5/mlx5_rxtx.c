@@ -33,6 +33,9 @@
 #include "mlx5_defs.h"
 #include "mlx5_prm.h"
 
+//repu1sion - hack to share context from mlx5.c received from mlx_probe()
+extern struct ibv_context *master_ctx;
+
 static __rte_always_inline uint32_t
 rxq_cq_to_pkt_type(volatile struct mlx5_cqe *cqe);
 
@@ -1825,11 +1828,28 @@ mlx5_rx_burst(void *dpdk_rxq, struct rte_mbuf **pkts, uint16_t pkts_n)
 				pkt->vlan_tci =
 					rte_be_to_cpu_16(cqe->vlan_info);
 			}
+//original code
+#if 0
 			if (rxq->hw_timestamp) {
 				pkt->timestamp =
 					rte_be_to_cpu_64(cqe->timestamp);
 				pkt->ol_flags |= PKT_RX_TIMESTAMP;
 			}
+#endif
+
+//int mlx5dv_get_clock_info(struct ibv_context *ctx_in, struct mlx5dv_clock_info *clock_info);
+
+			//repu1sion
+			int rv;
+			if (rxq->hw_timestamp) 
+			{
+				uint64_t ts = rte_be_to_cpu_64(cqe->timestamp);
+				struct mlx5dv_clock_info mlx_clock_info;
+				rv = mlx5dv_get_clock_info(master_ctx, &mlx_clock_info);
+				pkt->timestamp = mlx5dv_ts_to_ns(mlx_clock_info, ts);
+				pkt->ol_flags |= PKT_RX_TIMESTAMP;
+			}
+
 			if (rxq->crc_present)
 				len -= ETHER_CRC_LEN;
 			PKT_LEN(pkt) = len;
