@@ -955,6 +955,7 @@ rxq_burst_v(struct mlx5_rxq_data *rxq, struct rte_mbuf **pkts, uint16_t pkts_n,
 		rxq_cq_to_ptype_oflags_v(rxq, ptype_info, flow_tag,
 					 opcode, &elts[pos]);
 		if (rxq->hw_timestamp) {
+		printf("neon rx\n");
 			elts[pos]->timestamp =
 				rte_be_to_cpu_64(
 					container_of(p0, struct mlx5_cqe,

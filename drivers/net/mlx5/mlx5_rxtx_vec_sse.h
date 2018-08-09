@@ -28,6 +28,9 @@
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 
+//repu1sion - hack to share context from mlx5.c received from mlx_probe()
+extern struct ibv_context *master_ctx;
+
 /**
  * Fill in buffer descriptors in a multi-packet send descriptor.
  *
@@ -909,14 +912,25 @@ rxq_burst_v(struct mlx5_rxq_data *rxq, struct rte_mbuf **pkts, uint16_t pkts_n,
 		/* D.5 fill in mbuf - rearm_data and packet_type. */
 		rxq_cq_to_ptype_oflags_v(rxq, cqes, opcode, &pkts[pos]);
 		if (rxq->hw_timestamp) {
-			pkts[pos]->timestamp =
-				rte_be_to_cpu_64(cq[pos].timestamp);
-			pkts[pos + 1]->timestamp =
-				rte_be_to_cpu_64(cq[pos + p1].timestamp);
-			pkts[pos + 2]->timestamp =
-				rte_be_to_cpu_64(cq[pos + p2].timestamp);
-			pkts[pos + 3]->timestamp =
-				rte_be_to_cpu_64(cq[pos + p3].timestamp);
+			int rv;
+			uint64_t ts;
+			struct mlx5dv_clock_info mlx_clock_info;
+			rv = mlx5dv_get_clock_info(master_ctx, &mlx_clock_info);
+			if (!rv)
+			{
+				ts = rte_be_to_cpu_64(cq[pos].timestamp);
+				pkts[pos]->timestamp = mlx5dv_ts_to_ns(&mlx_clock_info, ts);
+					//rte_be_to_cpu_64(cq[pos].timestamp);
+				ts = rte_be_to_cpu_64(cq[pos + p1].timestamp);
+				pkts[pos + 1]->timestamp = mlx5dv_ts_to_ns(&mlx_clock_info, ts);
+					//rte_be_to_cpu_64(cq[pos + p1].timestamp);
+				ts = rte_be_to_cpu_64(cq[pos + p2].timestamp);
+				pkts[pos + 2]->timestamp = mlx5dv_ts_to_ns(&mlx_clock_info, ts);
+					//rte_be_to_cpu_64(cq[pos + p2].timestamp);
+				ts = rte_be_to_cpu_64(cq[pos + p3].timestamp);
+				pkts[pos + 3]->timestamp = mlx5dv_ts_to_ns(&mlx_clock_info, ts);
+					//rte_be_to_cpu_64(cq[pos + p3].timestamp);
+			}
 		}
 #ifdef MLX5_PMD_SOFT_COUNTERS
 		/* Add up received bytes count. */

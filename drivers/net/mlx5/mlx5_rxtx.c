@@ -1751,6 +1751,8 @@ mlx5_rx_burst(void *dpdk_rxq, struct rte_mbuf **pkts, uint16_t pkts_n)
 	unsigned int rq_ci = rxq->rq_ci << sges_n;
 	int len = 0; /* keep its value across iterations. */
 
+	printf("mlx5_rx_burst() called\n");
+
 	while (pkts_n) {
 		unsigned int idx = rq_ci & wqe_cnt;
 		volatile struct mlx5_wqe_data_seg *wqe = &(*rxq->wqes)[idx];
@@ -1844,6 +1846,7 @@ mlx5_rx_burst(void *dpdk_rxq, struct rte_mbuf **pkts, uint16_t pkts_n)
 			if (rxq->hw_timestamp) 
 			{
 				uint64_t ts = rte_be_to_cpu_64(cqe->timestamp);
+				printf("ts: %lu \n", ts);
 				struct mlx5dv_clock_info mlx_clock_info;
 				rv = mlx5dv_get_clock_info(master_ctx, &mlx_clock_info);
 				if (!rv)
